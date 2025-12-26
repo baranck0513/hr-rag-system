@@ -58,7 +58,7 @@ This system allows HR departments to:
 - Python 3.12+
 - Docker & Docker Compose (for containerised deployment)
 
-### Option 1: Run with Docker (Recommended)
+### Option 1: Run with Docker
 ```bash
 # Clone the repository
 git clone https://github.com/baranck0513/hr-rag-system.git
