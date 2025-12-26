@@ -1,0 +1,71 @@
+# HR RAG System - Docker Compose
+#
+# This file defines all the services needed to run the full system:
+# - API: The FastAPI application
+# - Qdrant: Vector database for storing embeddings
+#
+# Usage:
+#   Start:   docker-compose up -d
+#   Stop:    docker-compose down
+#   Logs:    docker-compose logs -f
+#   Rebuild: docker-compose up -d --build
+
+version: '3.8'
+
+services:
+  # --- API Service ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hr-rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - LOG_LEVEL=INFO
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - hr-rag-network
+
+  # --- Qdrant Vector Database ---
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: hr-rag-qdrant
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - hr-rag-network
+
+# --- Networks ---
+networks:
+  hr-rag-network:
+    driver: bridge
+
+# --- Volumes ---
+volumes:
+  qdrant_data:
+    driver: local
