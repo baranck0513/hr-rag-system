@@ -1,8 +1,3 @@
-# HR RAG System - Dockerfile
-#
-# This file contains instructions for building a Docker container
-# that runs the HR RAG System API.
-#
 # Build:  docker build -t hr-rag-system .
 # Run:    docker run -p 8000:8000 hr-rag-system
 
